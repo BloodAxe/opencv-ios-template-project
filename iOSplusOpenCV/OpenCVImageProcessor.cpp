@@ -12,6 +12,7 @@
 #include <opencv2/opencv.hpp>
 #include <boost/assert.hpp>
 
+// A helper macro
 #define GIL2CV(GilView) getIplImageView(GilView)
 
 void OpenCVImageProcessor::process(boost::gil::bgr8_view_t src, boost::gil::bgr8_view_t dst)

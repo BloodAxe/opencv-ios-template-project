@@ -13,46 +13,12 @@
 @implementation iOSplusOpenCVViewController
 @synthesize mainButton;
 
-- (void)didReceiveMemoryWarning
-{
-    [super didReceiveMemoryWarning];
-    // Release any cached data, images, etc that aren't in use.
-}
-
 #pragma mark - View lifecycle
-
-- (void)viewDidLoad
-{
-  [super viewDidLoad];
-}
 
 - (void)viewDidUnload
 {
   [self setMainButton:nil];
-    [super viewDidUnload];
-    // Release any retained subviews of the main view.
-    // e.g. self.myOutlet = nil;
-}
-
-- (void)viewWillAppear:(BOOL)animated
-{
-    [super viewWillAppear:animated];
-}
-
-- (void)viewDidAppear:(BOOL)animated
-{
-    [super viewDidAppear:animated];
-
-}
-
-- (void)viewWillDisappear:(BOOL)animated
-{
-	[super viewWillDisappear:animated];
-}
-
-- (void)viewDidDisappear:(BOOL)animated
-{
-	[super viewDidDisappear:animated];
+  [super viewDidUnload];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -69,7 +35,7 @@
 
 - (void) buttonDidTapped:(id)sender
 {
-  // Do any additional setup after loading the view, typically from a nib.
+  // When the user taps on screen we present the image picker dialog to select the input image
   UIImagePickerController * picker = [[UIImagePickerController alloc] init];
   picker.delegate = self;
   picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
@@ -86,14 +52,14 @@
   
   iOSplusOpenCVAppDelegate * appDelegate = [[UIApplication sharedApplication] delegate];
   
+  // Process the input image and present the result:
   UIImage * processedImage = [appDelegate.imageProcessor processImage:image];
   self.mainButton.imageView.image = processedImage;
 }
 
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker
 {
-  [picker dismissModalViewControllerAnimated:NO];
-  [self dismissModalViewControllerAnimated:NO];
+  [picker dismissModalViewControllerAnimated:YES];
 }
 
 @end

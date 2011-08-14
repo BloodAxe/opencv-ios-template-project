@@ -12,6 +12,34 @@
 
 @implementation ImageProcessingImpl
 
+template <typename View1, typename View2>
+void copy_with_regards_to_orientation(View1 sourceView, View2 dstView, UIImageOrientation orientation)
+{
+  using namespace boost::gil;
+  
+  switch (orientation)
+  {
+    case UIImageOrientationLeft:
+      copy_and_convert_pixels(rotated90ccw_view(sourceView), dstView);
+      break;
+      
+    case UIImageOrientationRight:
+      copy_and_convert_pixels(rotated90cw_view(sourceView), dstView);
+      break;
+      
+    case UIImageOrientationDown:
+      copy_and_convert_pixels(rotated180_view(sourceView), dstView);
+      break;
+      
+    default:
+      copy_and_convert_pixels(sourceView, dstView);
+      break;
+  }
+}
+
+/**
+ * Converts UIImage to Boost::Gil image holder.
+ */
 - (boost::gil::bgr8_image_t) convertUIImageToGILImage:(UIImage*) input
 {
   boost::gil::bgr8_image_t result;
@@ -50,73 +78,18 @@
   if (numPixels == 4 && bitPerComponent == 8)
   {
     bgra8_view_t sourceView = interleaved_view(srcWidth, srcHeight,(bgra8_pixel_t*)dataPtr, stride);
-    
-    switch (orientation)
-    {
-      case UIImageOrientationLeft:
-        copy_pixels(rotated90ccw_view(sourceView), view(result));
-        break;
-        
-      case UIImageOrientationRight:
-        copy_pixels(rotated90cw_view(sourceView), view(result));
-        break;
-        
-      case UIImageOrientationDown:
-        copy_pixels(rotated180_view(sourceView), view(result));
-        break;
-        
-      default:
-        copy_pixels(sourceView, view(result));
-        break;
-    }
+    copy_with_regards_to_orientation(sourceView, view(result), orientation);
   }
   else if(numPixels == 3 && bitPerComponent == 8)
   {
     bgr8_view_t sourceView = interleaved_view(srcWidth, srcHeight,(bgr8_pixel_t*)dataPtr, stride);
-    
-    switch (orientation)
-    {
-      case UIImageOrientationLeft:
-        copy_and_convert_pixels(rotated90ccw_view(sourceView), view(result));
-        break;
-      
-      case UIImageOrientationRight:
-        copy_and_convert_pixels(rotated90cw_view(sourceView), view(result));
-        break;
-      
-      case UIImageOrientationDown:
-        copy_and_convert_pixels(rotated180_view(sourceView), view(result));
-        break;
-      
-      default:
-        copy_and_convert_pixels(sourceView, view(result));
-        break;
-    }
-    
+    copy_with_regards_to_orientation(sourceView, view(result), orientation);
   }
   else if(numPixels == 1 && bitPerComponent == 8) // Assume gray pixel
   {
     // assume grayscale image
     gray8_view_t sourceView = interleaved_view(srcWidth, srcHeight,(gray8_pixel_t*)dataPtr, stride);
-    
-    switch (orientation)
-    {
-      case UIImageOrientationLeft:
-        copy_and_convert_pixels(rotated90ccw_view(sourceView), view(result));
-        break;
-      
-      case UIImageOrientationRight:
-        copy_and_convert_pixels(rotated90cw_view(sourceView), view(result));
-        break;
-      
-      case UIImageOrientationDown:
-        copy_and_convert_pixels(rotated180_view(sourceView), view(result));
-        break;
-      
-      default:
-        copy_and_convert_pixels(sourceView, view(result));
-        break;
-    }
+    copy_with_regards_to_orientation(sourceView, view(result), orientation);
   }
   else
   {
@@ -128,6 +101,9 @@
   return result;
 }
 
+/**
+ * Converts Boost::Gil image to UIImage.
+ */
 - (UIImage*) convertGILImageToUIImage: (boost::gil::bgr8_image_t&) input
 {
   using namespace boost::gil;
@@ -165,15 +141,21 @@
   return ret;
 }
 
+/**
+ * The main processing function
+ */
 - (UIImage*) processImage:(UIImage*) src
 {
   OpenCVImageProcessor processor;
 
+  // Convert source image from UIImage to Boost::Gil for further processing.
   boost::gil::bgr8_image_t srcImage = [self convertUIImageToGILImage:src];
   boost::gil::bgr8_image_t dstImage(srcImage.dimensions());
 
+  // Delegate the call
   processor.process(view(srcImage), view(dstImage));
-  
+
+  // Convert result image back to UIImage
   return [self convertGILImageToUIImage:dstImage];
 }
 
