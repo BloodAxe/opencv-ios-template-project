@@ -10,12 +10,15 @@
 
 #import <UIKit/UIKit.h>
 
-@interface iOSplusOpenCVViewController : UIViewController<UINavigationControllerDelegate,UIImagePickerControllerDelegate> 
+@interface iOSplusOpenCVViewController : UIViewController<UINavigationControllerDelegate,UIImagePickerControllerDelegate,UIPopoverControllerDelegate> 
 {
   UIButton *mainButton;
+  UIPopoverController *popoverController;
 }
 
 @property (strong, nonatomic) IBOutlet UIButton *mainButton;
+@property (nonatomic, retain) UIPopoverController *popoverController;
+
 - (IBAction)buttonDidTapped:(id)sender;
 
 @end

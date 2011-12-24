@@ -11,7 +11,7 @@
 #import "iOSplusOpenCVAppDelegate.h"
 
 @implementation iOSplusOpenCVViewController
-@synthesize mainButton;
+@synthesize mainButton, popoverController;
 
 #pragma mark - View lifecycle
 
@@ -39,8 +39,29 @@
   UIImagePickerController * picker = [[UIImagePickerController alloc] init];
   picker.delegate = self;
   picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
-  [self presentModalViewController:picker animated:YES];
+  
+  if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
+  {
+    self.popoverController = [[UIPopoverController alloc] initWithContentViewController:picker];
+    self.popoverController.delegate = self;
+    [self.popoverController presentPopoverFromRect:mainButton.bounds inView:self.view permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];    
+  }
+  else
+  {
+    [self presentModalViewController:picker animated:YES];    
+  }
 }
+
+- (BOOL)popoverControllerShouldDismissPopover:(UIPopoverController *)popoverController
+{
+  return true;
+}
+
+- (void)popoverControllerDidDismissPopover:(UIPopoverController *)popoverController
+{
+  int d = 0;
+}
+
 
 #pragma mark - UIImagePickerControllerDelegate implementation
 
